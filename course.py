@@ -37,9 +37,9 @@ recommended_courses = {
 }
 
 grades = {}
-for column in X.columns:
+for idx, column in enumerate(X.columns):
     while True:
-        grade = st.text_input(f"What is your grade in {column}? ")
+        grade = st.text_input(f"What is your grade in {column}? ", key=f"grade_{idx}")
         if grade.upper() in ["A", "B", "C", "D", "F"]:
             if grade.upper() != "F":
                 grades[column] = label_encoder.transform([grade.upper()])[0]
