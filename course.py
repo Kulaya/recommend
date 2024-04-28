@@ -32,7 +32,7 @@ def train_model(X_train, y_train, n_neighbors=5):
     return knn
 
 def main():
-    st.title("College Recommendation System")
+    st.title("Course Recommendation System")
 
     # Load the dataset
     dataset = load_data()
