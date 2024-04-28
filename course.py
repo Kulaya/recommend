@@ -1,5 +1,5 @@
-import pandas as pd
 import streamlit as st
+import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -21,41 +21,47 @@ knn = KNeighborsClassifier(n_neighbors=5)
 # Train the KNN model
 knn.fit(X, y)
 
-# Streamlit application
-st.title("Course Recommendation System")
-
-st.write("Welcome to the Course Recommendation System!")
-st.write("Please enter your grades for the following subjects (A, B, C, D, or F):")
-
-# Dictionary to map field of interest to recommended course
-recommended_courses = {
-    "Domestic and Industrial Electricity": "Electrical and Industrial Automation Engineering",
-    "Computer": "Electrical and Computer Engineering",
-    "Electronics": "Electronics and Telecommunication Engineering",
-    "Networks": "Electrical and Computer Engineering",
-    "Solar Electricity": "Electrical and Renewable Energy"
-}
-
-grades = {}
-for idx, column in enumerate(X.columns):
-    while True:
-        grade = st.text_area(f"What is your grade in {column}? ", key=f"grade_{column}_{idx}")
-        if grade.upper() in ["A", "B", "C", "D", "F"]:
-            if grade.upper() != "F":
+# Define function to get user grades
+def get_user_grades():
+    grades = {}
+    for column in X.columns:
+        while True:
+            grade = st.text_input(f"What is your grade in {column}? ")
+            if grade.upper() in ["A", "B", "C", "D"]:
                 grades[column] = label_encoder.transform([grade.upper()])[0]
-            break
-        else:
-            st.write("Invalid grade. Please enter A, B, C, D, or F.")
+                break
+            elif grade.upper() == "F":
+                return None  # Return None if F is encountered
+            else:
+                st.warning("Invalid grade. Please enter A, B, C, D, or F.")
+    return grades
 
-if grades:
-    # Predict the field of interest
-    user_data = pd.DataFrame([grades])
-    predicted_field = knn.predict(user_data)
+# Main function for Streamlit app
+def main():
+    st.title("Course Recommendation System")
 
-    # Map predicted field to recommended course
-    recommended_course = recommended_courses.get(predicted_field[0], "Unknown")
+    # Get user grades
+    st.header("Enter Your Grades")
+    grades = get_user_grades()
 
-    if recommended_course != "Unknown":
-        st.write("\nBased on your grades, the recommended course is:", recommended_course)
+    # Predict and recommend course
+    if grades is not None:
+        user_data = pd.DataFrame([grades])
+        predicted_field = knn.predict(user_data)[0]
+
+        # Map predicted field to recommended course
+        recommended_courses = {
+            "Domestic and Industrial Electricity": "Electrical and Industrial Automation Engineering",
+            "Computer": "Electrical and Computer Engineering",
+            "Electronics": "Electronics and Telecommunication Engineering",
+            "Networks": "Electrical and Computer Engineering",
+            "Solar Electricity": "Electrical and Renewable Energy"
+        }
+
+        recommended_course = recommended_courses.get(predicted_field, "Unknown")
+        st.success(f"Based on your grades, the recommended course is: {recommended_course}")
     else:
-        st.write("\nBased on your grades, no recommended course is available.")
+        st.warning("You have 4 or more F's in your grades. Unable to provide a recommendation.")
+
+if __name__ == "__main__":
+    main()
