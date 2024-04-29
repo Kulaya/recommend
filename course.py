@@ -7,13 +7,13 @@ from sklearn.neighbors import KNeighborsClassifier
 # Load the dataset
 @st.cache
 def load_data():
-    dataset = pd.read_csv("course_recommendation_data.csv")
+    dataset = pd.read_csv("/home/aviti/Documents/course_recommendation_dataset.csv")
     return dataset
 
 # Preprocess the dataset
 def preprocess_data(dataset):
-    X = dataset.drop('Field_of_Interest', axis=1)
-    y = dataset['Field_of_Interest']
+    X = dataset.drop('Field of Interest', axis=1)
+    y = dataset['Field of Interest']
 
     # Convert grades to numerical values using label encoding
     label_encoder = LabelEncoder()
@@ -47,18 +47,13 @@ def main():
     st.write("Please enter your grades for the following subjects (A, B, C, or D):")
     grades = {}
     for column in dataset.columns[:-1]:
-        grade_options = ['A', 'B', 'C', 'D', 'F']
-        grade = st.selectbox(f"What is your grade in {column}?", grade_options)
+        grade = st.selectbox(f"What is your grade in {column}?", ['A', 'B', 'C', 'D'])
         grades[column] = label_encoder.transform([grade])[0]
 
     # Predict the field of interest
     user_data = pd.DataFrame([grades])
-    try:
-        predicted_field = knn.predict(user_data)
-        st.write("\nBased on your grades, the predicted field of interest is:", predicted_field[0])
-    except ValueError as e:
-        st.write("Unable to make a recommendation due to unseen labels in user input.")
-        st.write("Error details:", e)
+    predicted_field = knn.predict(user_data)
+    st.write("\nBased on your grades, the predicted field of interest is:", predicted_field[0])
 
 if __name__ == "__main__":
     main()
